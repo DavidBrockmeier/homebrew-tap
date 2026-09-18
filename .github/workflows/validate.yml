@@ -49,11 +49,11 @@ jobs:
         env:
           PRIVATE_API: ${{ matrix.private_api }}
         run: |
-          option=--without-metal-private-api
+          options=()
           if [ "$PRIVATE_API" = enabled ]; then
-            option=--with-metal-private-api
+            options+=(--with-metal-private-api)
           fi
-          brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "$option"
+          brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "${options[@]}"
       - name: Verify installed package
         run: |
           ruby -rjson -e 'tab = JSON.parse(File.read(ARGV.fetch(0))); abort "Wrong formula installed" unless tab.fetch("source").fetch("tap").downcase == "davidbrockmeier/tap"' \

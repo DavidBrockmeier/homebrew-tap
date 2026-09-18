@@ -51,11 +51,9 @@ brew reinstall DavidBrockmeier/tap/molten-vk --with-metal-private-api
 
 These interfaces implement graphics compatibility features. They do not enable
 M5 Neural Accelerators, TensorOps convolution, or cooperative-matrix support.
-The default build leaves them disabled. To explicitly return to the default:
-
-```sh
-brew reinstall DavidBrockmeier/tap/molten-vk --without-metal-private-api
-```
+The default build leaves them disabled. Homebrew retains selected build options
+on reinstall; use the rollback procedure below to return to the standard core
+package. The formula does not define a `--without-metal-private-api` switch.
 
 ## Requirements and build
 
