@@ -43,6 +43,8 @@ jobs:
         run: |
           ruby -c Formula/molten-vk.rb
           brew style --formula DavidBrockmeier/tap/molten-vk
+      - name: Install the core package to exercise the same-name replacement
+        run: brew install homebrew/core/molten-vk
       - name: Build replacement formula
         env:
           PRIVATE_API: ${{ matrix.private_api }}
@@ -51,11 +53,7 @@ jobs:
           if [ "$PRIVATE_API" = enabled ]; then
             option=--with-metal-private-api
           fi
-          if brew list --formula molten-vk >/dev/null 2>&1; then
-            brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "$option"
-          else
-            brew install --build-from-source DavidBrockmeier/tap/molten-vk "$option"
-          fi
+          brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "$option"
       - name: Verify installed package
         run: |
           ruby -rjson -e 'tab = JSON.parse(File.read(ARGV.fetch(0))); abort "Wrong formula installed" unless tab.fetch("source").fetch("tap").downcase == "davidbrockmeier/tap"' \

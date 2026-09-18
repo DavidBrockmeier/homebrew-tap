@@ -112,8 +112,9 @@ reinstallation does.
 
 ## Validation
 
-CI builds the same-named formula on an ARM64 macOS 26 runner, with and without
-the private-API option, and verifies package ownership and linkage. Where the
+CI replaces an installed Homebrew-core package with the same-named formula on
+an ARM64 macOS 26 runner, with and without the private-API option, and verifies
+package ownership and linkage. Where the
 runner exposes a Metal device, it also runs the formula test. A runner without
 a Metal device reports that GPU initialization was not checked. The formula test
 checks its installed ICD path, creates a Vulkan instance, enumerates a GPU, and
