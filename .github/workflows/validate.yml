@@ -47,10 +47,10 @@ jobs:
             "$(brew --prefix molten-vk)/INSTALL_RECEIPT.json"
           brew linkage --test DavidBrockmeier/tap/molten-vk
           file "$(brew --prefix molten-vk)/lib/libMoltenVK.dylib"
-      - name: Test Vulkan initialization when a Metal device is available
+      - name: Test Vulkan GPU transfer when a Metal device is available
         run: |
           if swift -e 'import Metal; import Darwin; exit(MTLCreateSystemDefaultDevice() == nil ? 1 : 0)'; then
             brew test DavidBrockmeier/tap/molten-vk
           else
-            echo "::notice::This runner has no usable Metal device; build and linkage were checked, GPU initialization was not."
+            echo "::notice::This runner has no usable Metal device; build and linkage were checked, GPU execution was not."
           fi
