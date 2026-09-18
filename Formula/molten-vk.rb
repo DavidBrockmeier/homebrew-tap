@@ -11,9 +11,9 @@ class MoltenVk < Formula
   option "with-metal-private-api", "Enable MoltenVK's private Metal graphics interfaces"
 
   depends_on "cmake" => :build
+  depends_on xcode: ["26.0", :build]
   depends_on arch: :arm64
   depends_on macos: :tahoe
-  depends_on xcode: ["26.0", :build]
 
   uses_from_macos "python" => :build
 
