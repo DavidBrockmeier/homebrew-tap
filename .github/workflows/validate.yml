@@ -1,0 +1,63 @@
+name: Build and test molten-vk
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: molten-vk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: macOS 26 ARM64 / private API ${{ matrix.private_api }}
+    runs-on: macos-26
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        private_api: [disabled, enabled]
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      HOMEBREW_MAKE_JOBS: "3"
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Prepare Homebrew and tap
+        run: |
+          test "$(uname -m)" = arm64
+          xcodebuild -version
+          brew update
+          brew tap --custom-remote DavidBrockmeier/tap "$GITHUB_WORKSPACE"
+          if brew help trust >/dev/null 2>&1; then
+            brew trust --formula DavidBrockmeier/tap/molten-vk
+          fi
+      - name: Check formula syntax and style
+        run: |
+          ruby -c Formula/molten-vk.rb
+          brew style --formula DavidBrockmeier/tap/molten-vk
+      - name: Build replacement formula
+        env:
+          PRIVATE_API: ${{ matrix.private_api }}
+        run: |
+          option=--without-metal-private-api
+          if [ "$PRIVATE_API" = enabled ]; then
+            option=--with-metal-private-api
+          fi
+          if brew list --formula molten-vk >/dev/null 2>&1; then
+            brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "$option"
+          else
+            brew install --build-from-source DavidBrockmeier/tap/molten-vk "$option"
+          fi
+      - name: Verify installed package
+        run: |
+          brew test DavidBrockmeier/tap/molten-vk
+          brew linkage --test DavidBrockmeier/tap/molten-vk
+          file "$(brew --prefix molten-vk)/lib/libMoltenVK.dylib"
