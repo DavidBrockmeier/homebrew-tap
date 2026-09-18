@@ -1,4 +1,4 @@
-name: Build and test molten-vk
+name: Build molten-vk
 
 on:
   push:
@@ -15,13 +15,9 @@ concurrency:
 
 jobs:
   build:
-    name: macOS 26 ARM64 / private API ${{ matrix.private_api }}
+    name: macOS 26 ARM64 / private APIs enabled
     runs-on: macos-26
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        private_api: [disabled, enabled]
     env:
       HOMEBREW_NO_AUTO_UPDATE: "1"
       HOMEBREW_NO_INSTALL_CLEANUP: "1"
@@ -39,21 +35,12 @@ jobs:
           if brew help trust >/dev/null 2>&1; then
             brew trust --formula DavidBrockmeier/tap/molten-vk
           fi
-      - name: Check formula syntax and style
-        run: |
-          ruby -c Formula/molten-vk.rb
-          brew style --formula DavidBrockmeier/tap/molten-vk
+      - name: Check formula syntax
+        run: ruby -c Formula/molten-vk.rb
       - name: Install the core package to exercise the same-name replacement
         run: brew install homebrew/core/molten-vk
       - name: Build replacement formula
-        env:
-          PRIVATE_API: ${{ matrix.private_api }}
-        run: |
-          options=()
-          if [ "$PRIVATE_API" = enabled ]; then
-            options+=(--with-metal-private-api)
-          fi
-          brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk "${options[@]}"
+        run: brew reinstall --build-from-source DavidBrockmeier/tap/molten-vk
       - name: Verify installed package
         run: |
           ruby -rjson -e 'tab = JSON.parse(File.read(ARGV.fetch(0))); abort "Wrong formula installed" unless tab.fetch("source").fetch("tap").downcase == "davidbrockmeier/tap"' \

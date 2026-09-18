@@ -1,6 +1,7 @@
 # Homebrew tap
 
-A same-name replacement formula for **`molten-vk`**. This tap deliberately
+A personal experimental replacement formula for **`molten-vk`**, with private
+Metal APIs enabled by default. This tap deliberately
 collides with `homebrew/core/molten-vk`: it uses the same Cellar name, opt link,
 library names, and Vulkan driver-manifest location. It is not keg-only and is not
 a separately named variant.
@@ -43,17 +44,14 @@ Installing this formula replaces the package; it does not prove a particular
 already-running application's selected Vulkan driver. Restart that application
 and verify its loaded library when comparing results.
 
-## Optional private Metal interfaces
+## Private Metal interfaces
 
-```sh
-brew reinstall DavidBrockmeier/tap/molten-vk --with-metal-private-api
-```
+Every build sets **`MVK_USE_METAL_PRIVATE_API=1`**. No opt-in flag is needed.
+The old `--with-metal-private-api` argument remains accepted for compatibility
+with earlier install commands. There is no public-API-only build variant here.
 
-These interfaces implement graphics compatibility features. They do not enable
-M5 Neural Accelerators, TensorOps convolution, or cooperative-matrix support.
-The default build leaves them disabled. Homebrew retains selected build options
-on reinstall; use the rollback procedure below to return to the standard core
-package. The formula does not define a `--without-metal-private-api` switch.
+This enables the SPI implementations already present in MoltenVK. It does not
+by itself implement TensorOps convolution or the unfinished cooperative-matrix path.
 
 ## Requirements and build
 
@@ -111,7 +109,7 @@ reinstallation does.
 ## Validation
 
 CI replaces an installed Homebrew-core package with the same-named formula on
-an ARM64 macOS 26 runner, with and without the private-API option, and verifies
+an ARM64 macOS 26 runner, with private Metal APIs enabled, and verifies
 package ownership and linkage. Where the
 runner exposes a Metal device, it also runs the formula test. A runner without
 a Metal device reports that GPU initialization was not checked. The formula test

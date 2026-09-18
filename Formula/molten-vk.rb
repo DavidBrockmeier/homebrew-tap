@@ -1,14 +1,15 @@
 # Based on Homebrew/homebrew-core's molten-vk formula (BSD-2-Clause).
 class MoltenVk < Formula
-  desc "Vulkan graphics and compute on Metal with selected upstream fixes"
+  desc "Vulkan on Metal with selected fixes and private API support"
   homepage "https://github.com/KhronosGroup/MoltenVK"
   url "https://github.com/KhronosGroup/MoltenVK/archive/4aaf714aa1b3e78e26ecfcefa9c75e9a576c500b.tar.gz"
   version "1.4.3-dev.20260918"
   sha256 "f5512b679bbf642904d6be75fd9ef63cccd67d65138b88d32cc0cb679b5ca891"
   license "Apache-2.0"
+  revision 1
   compatibility_version 1
 
-  option "with-metal-private-api", "Enable MoltenVK's private Metal graphics interfaces"
+  option "with-metal-private-api", "Compatibility flag; private Metal APIs are always enabled"
 
   depends_on "cmake" => :build
   depends_on xcode: ["26.0", :build]
@@ -76,8 +77,7 @@ class MoltenVk < Formula
                "SYMROOT=#{buildpath}/External/build", "OBJROOT=#{buildpath}/External/build",
                "build")
 
-    definitions = %w[MVK_CONFIG_LOG_LEVEL=MVK_CONFIG_LOG_LEVEL_NONE]
-    definitions << "MVK_USE_METAL_PRIVATE_API=1" if build.with?("metal-private-api")
+    definitions = %w[MVK_CONFIG_LOG_LEVEL=MVK_CONFIG_LOG_LEVEL_NONE MVK_USE_METAL_PRIVATE_API=1]
     xcodebuild(*architecture, "-configuration", "Release", "-sdk", "macosx",
                "-project", "MoltenVKPackaging.xcodeproj",
                "-scheme", "MoltenVK Package (macOS only)",
@@ -106,16 +106,6 @@ class MoltenVk < Formula
               (lib/"libMoltenVK.dylib").relative_path_from(prefix/"etc/vulkan/icd.d")
     (prefix/"etc/vulkan").install "MoltenVK/icd" => "icd.d"
     pkgshare.install "LICENSE"
-  end
-
-  def caveats
-    <<~EOS
-      This is the same-name replacement for homebrew/core/molten-vk.
-      The four included upstream patches are correctness fixes; a RIFE speedup
-      and M5 Neural Accelerator use have not been demonstrated.
-      The optional private Metal interfaces affect graphics compatibility,
-      not cooperative-matrix or TensorOps support.
-    EOS
   end
 
   test do
